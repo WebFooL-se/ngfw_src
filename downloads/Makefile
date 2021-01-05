@@ -25,7 +25,11 @@ tarballs_gz=apache-ant-1.6.5.tar.gz \
 	httpcomponents-client-4.5.1-bin.tar.gz \
 	slf4j-1.4.3.tar.gz \
 	python-jsonrpc-r19.tar.gz \
-	Ext.ux.Exporter-1.0.tar.gz
+	Ext.ux.Exporter-1.0.tar.gz \
+    Ext.ux.Exporter-1.0.tar.gz \
+    zxing-3.4.1.tar.gz \
+    jfreesvg-3.3.tar.gz \
+    jaxb-api-2.2.8.tar.gz
 
 tarballs_bz2=
 
