@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.time.Instant;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
@@ -334,9 +335,10 @@ public class LocalDirectoryImpl implements LocalDirectory
         
         // Look up the users shared secret.
         String secrethash = null;
+        String secret = null;
         for (LocalDirectoryUser user : this.currentList) {
             if (username.equals(user.getUsername())) {
-                String secret = user.getTwofactorSecretKey();
+                secret = user.getTwofactorSecretKey();
                 // If the user has not stored a secret, we assume that two factor is not enabled for user
                 if (secret == null || "".equals(secret))
                     return true;
@@ -345,13 +347,14 @@ public class LocalDirectoryImpl implements LocalDirectory
             }
         }
 
-        Long offset = (long)UvmContextFactory.context().systemManager().getTimeZoneOffset() / 1000;
+        // Long offset = (long)UvmContextFactory.context().systemManager().getTimeZoneOffset() / 1000;
+        Long offset = Instant.now().getEpochSecond() / 30;
 
         // We check time slots around the current one to accomadate slight time skews.
         // Eventually make this a setting.
-        if (checkTOTPCode(secrethash, code, offset) == false)
-            if (checkTOTPCode(secrethash, code, offset - 30) == false)
-                return checkTOTPCode(secrethash, code, offset + 30);
+        if (checkTOTPCode(secret, code, offset) == false)
+            if (checkTOTPCode(secret, code, offset - 1) == false)
+                return checkTOTPCode(secret, code, offset + 1);
         return true;
     }
 

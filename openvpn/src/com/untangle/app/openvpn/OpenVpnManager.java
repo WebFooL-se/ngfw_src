@@ -458,7 +458,7 @@ public class OpenVpnManager
             sb.append("auth-user-pass" + "\n");
         }
 
-        if (settings.getaddTOPTClientPrompt()) {
+        if (settings.getToptClientPrompt()) {
             sb.append("static-challenge \"TOTP Code \" 1" + "\n");
         }
 

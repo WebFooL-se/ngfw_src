@@ -96,7 +96,7 @@ Ext.define('Ung.apps.openvpn.view.Server', {
             boxLabel: 'Add TOTP prompt keyword to client config',
             disabled: true,
             bind: {
-                value: '{settings.addTOPTClientPrompt}',
+                value: '{settings.toptClientPrompt}',
                 disabled: '{settings.authUserPass == false || settings.authenticationType !== "LOCAL_DIRECTORY"}',
                 hidden: '{settings.authUserPass == false}'
             }
