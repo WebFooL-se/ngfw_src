@@ -6,7 +6,6 @@ Ext.define('Ung.config.local-directory.view.Users', {
     scrollable: true,
 
     layout: 'fit',
-
     items: [{
         xtype: 'ungrid',
         border: false,
@@ -87,15 +86,18 @@ Ext.define('Ung.config.local-directory.view.Users', {
                 return result;
             },this)
         }, {
-            header: 'Two factor secret'.t(),
+            xtype: 'actioncolumn',
+            header: 'TOTP secret'.t(),
             width: Renderer.messageWidth,
             dataIndex: 'twofactorSecretKey',
-            renderer: Ext.bind(function(value, metadata, record) {
-                if (record.get("twofactorSecretKey") == null) return('');
-                var result = "";
-                for(var i = 0 ; value != null && i < value.length ; i++) result = result + '*';
-                return result;
-            },this)
+            iconCls: 'fa fa-cog',
+            align: 'center',
+            handler: function(unk1, unk2, unk3, event, unk5, record) {
+                Rpc.asyncData('rpc.UvmContext.localDirectory.showSecretQR', record.get('username'), 'Untangle', record.get('twofactorSecretKey'))
+                .then(function(result){
+                    Ext.MessageBox.alert({ buttons: Ext.Msg.OK, maxWidth: 1024, title: 'Provide user with key or QR image.'.t(), msg: result});
+                });
+            }
         },{
             header: 'Expiration'.t(),
             dataIndex: 'expirationTime',
@@ -206,7 +208,8 @@ Ext.define('Ung.config.local-directory.view.Users', {
             },
             {
                 xtype: 'button',
-                text: 'Show key/QR',
+                iconCls: 'fa fa-cog',
+                align: 'center',
                 bind: {
                     hidden: '{!record.twofactorSecretKey}'
                 },

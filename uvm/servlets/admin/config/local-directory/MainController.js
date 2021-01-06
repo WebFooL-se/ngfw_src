@@ -141,7 +141,6 @@ Ext.define('Ung.config.local-directory.MainController', {
             Util.handleException(ex);
         });
     },
-
     configureCertificate: function (btn) {
         Ung.app.redirectTo("#config/administration/certificates");
     },
@@ -210,11 +209,6 @@ Ext.define('Ung.config.local-directory.MainController', {
             v.setLoading(false);
             Ext.MessageBox.alert({ buttons: Ext.Msg.OK, maxWidth: 1024, title: 'Account Creation Status'.t(), msg: '<tt>' + result.output + '</tt>' });
         });
-    },
-
-    generateKey: function(cmp) {
-        var vm = this.getViewModel();
-        console.log(vm);                                                     
     },
 
     testRadiusProxyLogin: function (cmp) {

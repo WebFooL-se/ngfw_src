@@ -10,18 +10,8 @@ import com.untangle.uvm.SettingsManager;
 import com.untangle.uvm.UvmContextFactory;
 import com.untangle.uvm.app.App;
 import com.untangle.uvm.app.AppSettings;
-import com.google.common.io.BaseEncoding;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import org.jfree.graphics2d.svg.SVGGraphics2D;
-import org.jfree.graphics2d.svg.ViewBox;
-import javax.crypto.KeyGenerator;
 import java.security.Key;
-
+import com.google.common.io.BaseEncoding;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Base32;
@@ -201,7 +191,7 @@ public class LocalDirectoryImpl implements LocalDirectory
     }
 
     /**
-     * Called to secret and QR code for a particular user.
+     * Called to obtain secret and QR code for a particular user.
      *
      * @param username
      *        The username used in the new key.
@@ -210,14 +200,9 @@ public class LocalDirectoryImpl implements LocalDirectory
      * @param secret
      *        The secret in Base32 encoding.
      * 
-     * @return URL string.
+     * @return Message text and SVG image. (String)
      */
     public String showSecretQR(String username, String issuer, String secret) {
-        int width = 200;
-        int height = 200;
-        boolean withViewBox = true;
-
-        BufferedImage image = null;
         String url = new StringBuilder("otpauth://totp/").append(username.toLowerCase().trim())
         .append("@")
         .append(issuer.toLowerCase().trim())
@@ -225,42 +210,9 @@ public class LocalDirectoryImpl implements LocalDirectory
         .append(secret.toUpperCase().trim())
         .toString();
 
-        try {
-            Hashtable<EncodeHintType, Object> hintMap = new Hashtable<>();
-            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix byteMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, width, height, hintMap);
-            int CrunchifyWidth = byteMatrix.getWidth();
-
-            image = new BufferedImage(CrunchifyWidth, CrunchifyWidth, BufferedImage.TYPE_INT_RGB);
-            image.createGraphics();
-
-            Graphics2D graphics = (Graphics2D) image.getGraphics();
-            graphics.setColor(Color.WHITE);
-            graphics.fillRect(0, 0, CrunchifyWidth, CrunchifyWidth);
-            graphics.setColor(Color.BLACK);
-
-            for (int i = 0; i < CrunchifyWidth; i++) {
-                for (int j = 0; j < CrunchifyWidth; j++) {
-                    if (byteMatrix.get(i, j)) {
-                        graphics.fillRect(i, j, 1, 1);
-                    }
-                }
-            }
-        } catch(WriterException e) {
-            logger.warn("Not able to generate QR image.");
-            return ("Unable to generate QR image, please contact support.");
-        }
-        // Convert to SVG
-        SVGGraphics2D Qr = new SVGGraphics2D(width, height);
-        Qr.drawImage(image, 0,0, width, height, null);
-
-        ViewBox viewBox = null;
-        if (withViewBox){
-            viewBox = new ViewBox(0,0,width,height);
-        }
-        String QrSvg =  Qr.getSVGElement(null, true, viewBox, null, null);
-        return ("Manuel entry: " + secret + "<BR>" + QrSvg);
+        String command = new StringBuilder("/usr/bin/qrencode -s 4 -t SVG -o - ").append(url).toString();
+        String QrSvg =  UvmContextFactory.context().execManager().execOutput(command);
+        return ("Manual entry: " + secret + "<BR>" + QrSvg);
     }
 
     /**
