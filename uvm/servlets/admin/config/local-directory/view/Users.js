@@ -92,7 +92,6 @@ Ext.define('Ung.config.local-directory.view.Users', {
             dataIndex: 'twofactorSecretKey',
             renderer: Ext.bind(function(value, metadata, record) {
                 if (record.get("twofactorSecretKey") == null) return('');
-                if(Ext.isEmpty(value) && record.get("twofactorSecretKey").length > 0) return('*** ' + 'Unchanged'.t() + ' ***');
                 var result = "";
                 for(var i = 0 ; value != null && i < value.length ; i++) result = result + '*';
                 return result;

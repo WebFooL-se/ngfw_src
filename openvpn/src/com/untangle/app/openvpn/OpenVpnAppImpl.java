@@ -455,7 +455,7 @@ public class OpenVpnAppImpl extends AppBase
     public int userAuthenticate(String username, String password, long otpcode)
     {
         boolean isAuthenticated = false;
-        
+    
         switch (getSettings().getAuthenticationType())
         {
         case ACTIVE_DIRECTORY:

@@ -217,10 +217,6 @@ Ext.define('Ung.config.local-directory.MainController', {
         console.log(vm);                                                     
     },
 
-    showKeyQR: function(cmp) {
-
-    },
-
     testRadiusProxyLogin: function (cmp) {
         var v = cmp.isXType('button') ? cmp.up('panel') : cmp;
         var testuser = v.down("[fieldIndex='testUsername']").getValue();

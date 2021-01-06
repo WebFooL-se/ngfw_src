@@ -201,7 +201,7 @@ public class LocalDirectoryImpl implements LocalDirectory
     }
 
     /**
-     * Called to generate new random key for two factor auth.
+     * Called to secret and QR code for a particular user.
      *
      * @param username
      *        The username used in the new key.
@@ -331,10 +331,7 @@ public class LocalDirectoryImpl implements LocalDirectory
         // First check if username/password is correct. If not we don't need to do more work.
         if (authenticate(username, password) == false) return false;
 
-      
-        
         // Look up the users shared secret.
-        String secrethash = null;
         String secret = null;
         for (LocalDirectoryUser user : this.currentList) {
             if (username.equals(user.getUsername())) {
@@ -342,19 +339,18 @@ public class LocalDirectoryImpl implements LocalDirectory
                 // If the user has not stored a secret, we assume that two factor is not enabled for user
                 if (secret == null || "".equals(secret))
                     return true;
-                secrethash = (Base64.decodeBase64(secret.getBytes())).toString();
                 break;
             }
         }
 
-        // Long offset = (long)UvmContextFactory.context().systemManager().getTimeZoneOffset() / 1000;
+        // Get current time slot. 
         Long offset = Instant.now().getEpochSecond() / 30;
 
-        // We check time slots around the current one to accomadate slight time skews.
-        // Eventually make this a setting.
-        if (checkTOTPCode(secret, code, offset) == false)
-            if (checkTOTPCode(secret, code, offset - 1) == false)
-                return checkTOTPCode(secret, code, offset + 1);
+        // We check time slots +/- 1 to account for slight time skew and user slowness.
+        // TODO: Consider making #slots a admin setting.
+        if (verifyTOTPcode(secret, code, offset) == false)
+            if (verifyTOTPcode(secret, code, offset - 1) == false)
+                return verifyTOTPcode(secret, code, offset + 1);
         return true;
     }
 
@@ -1130,22 +1126,22 @@ public class LocalDirectoryImpl implements LocalDirectory
     }
 
 /**
- * Check of TOTP code is correct.
+ * verify users TOTP code.
  *
  * @param secret
  *        Shared secret
  * @param code
  *        User provided code
- * @param time
- *        Current time.
+ * @param timeslot
+ *        Current time slot. epoch seconds divided by time delta.
  *
  * @return true if code is good, otherwise false.
  */
-    private boolean checkTOTPCode(String secret, long code, long time)
+    private boolean verifyTOTPcode(String secret, long code, long timeslot)
     {
         Base32 codec = new Base32();
         byte[] data = new byte[8];
-        long value = time;
+        long value = timeslot;
         byte[] decodedKey = codec.decode(secret);
         byte[] hash;
 
